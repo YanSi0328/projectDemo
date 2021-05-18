@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>异步访问</title>
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap.css"/>
+    <script src="../js/jquery-3.6.0.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
+    <style>
+        .mainDiv {
+            width: 80%;
+            margin: 100px auto;
+        }
+
+        .alertMsg {
+            position: absolute;
+            top: 30%;
+            left: 30%;
+        }
+
+        .myalert {
+            width: 300px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+<div class="mainDiv">
+    <form class="form-inline">
+        <div class="form-group">
+            <label for="prodid">商品id</label>
+            <input type="text" class="form-control" id="prodid" name="prodid" placeholder="prodid">
+        </div>
+        <div class="form-group">
+            <label for="prodname">商品名称</label>
+            <input type="text" class="form-control" id="prodname" name="prodname" placeholder="prodname">
+        </div>
+        <button type="button" class="btn btn-info" id="selectBtn">查询</button>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addModal">添加</button>
+        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#updateModal" id="upBtn">修改
+        </button>
+        <button type="button" class="btn btn-danger" data-toggle="modal" id="delBtn">删除</button>
+    </form>
+    <table class="table">
+        <caption>商品信息表</caption>
+        <thead>
+        <tr>
+            <th>商品编号</th>
+            <th>商品名称</th>
+            <th>商品价格</th>
+            <th>商品图片</th>
+            <th>商品描述</th>
+        </tr>
+        </thead>
+        <tbody id="dataMsg"></tbody>
+    </table>
+    <input id="prevBtn" type="button" class="btn btn-default" value="上一页">
+    <input id="nextBtn" type="button" class="btn btn-default" value="下一页">
+
+    当前第 <span id="pageSpan"></span> 页 每页显示 <span id="pageSizeSpan"></span> 条记录 总共 <span id="totalPageSpan"></span> 页
+</div>
+
+<!-- 添加商品信息模态框 -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">添加商品</h4>
+            </div>
+            <div class="modal-body">
+                <form id="addform" method="get">
+                    <div class="form-group">
+                        <label for="addprodId">商品ID</label>
+                        <input type="text" class="form-control" id="addprodId" name="prodId" placeholder="prodId">
+                    </div>
+                    <div class="form-group">
+                        <label for="addprodName">商品名称</label>
+                        <input type="text" class="form-control" id="addprodName" name="prodName" placeholder="prodName">
+                    </div>
+                    <div class="form-group">
+                        <label for="addprodPrice">商品单价</label>
+                        <input type="text" class="form-control" id="addprodPrice" name="prodPrice"
+                               placeholder="prodPrice">
+                    </div>
+                    <div class="form-group">
+                        <label for="addprodImg">商品图片地址</label>
+                        <input type="text" class="form-control" id="addprodImg" name="prodImg" placeholder="prodImg">
+                    </div>
+                    <div class="form-group">
+                        <label for="addprodDesc">商品描述</label>
+                        <input type="text" class="form-control" id="addprodDesc" name="prodDesc" placeholder="prodDesc">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="addBtn" type="button" class="btn btn-primary" data-dismiss="modal">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 修改商品信息模态框 -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">修改商品</h4>
+            </div>
+            <div class="modal-body">
+                <form id="editform">
+                    <div class="form-group">
+                        <label for="addprodId">商品ID</label>
+                        <input type="text" class="form-control" readonly id="editprodId" name="prodId"
+                               placeholder="prodId">
+                    </div>
+                    <div class="form-group">
+                        <label for="addprodName">商品名称</label>
+                        <input type="text" class="form-control" id="editprodName" name="prodName"
+                               placeholder="prodName">
+                    </div>
+                    <div class="form-group">
+                        <label for="addprodPrice">商品单价</label>
+                        <input type="text" class="form-control" id="editprodPrice" name="prodPrice"
+                               placeholder="prodPrice">
+                    </div>
+                    <div class="form-group">
+                        <label for="addprodImg">商品图片地址</label>
+                        <input type="text" class="form-control" id="editprodImg" name="prodImg" placeholder="prodImg">
+                    </div>
+                    <div class="form-group">
+                        <label for="addprodDesc">商品描述</label>
+                        <input type="text" class="form-control" id="editprodDesc" name="prodDesc"
+                               placeholder="prodDesc">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="editSubmitBtn" type="button" class="btn btn-primary" data-dismiss="modal">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="showMsg" class="alertMsg"></div>
+
+</body>
+<script>
+    var page;
+    var pageSize;
+    var totalPage;
+    var param;
+
+    // 进入页面后先调用
+    checkBtn();
+    sendPost("");
+
+    // 查询事件
+    $("#selectBtn").click(function () {
+        // 封装数据
+        param = {"prodid": $("#prodid").val(), "prodname": $("#prodname").val()};
+        sendPost(param);
+    });
+    // 向前查找事件
+    $("#prevBtn").click(function () {
+        param = {
+            "page": page - 1,
+            "pageSize": pageSize,
+            "prodid": $("#prodid").val(),
+            "prodname": $("#prodname").val()
+        };
+        sendPost(param);
+    });
+    // 向后查找事件
+    $("#nextBtn").click(function () {
+        param = {
+            "page": page + 1,
+            "pageSize": pageSize,
+            "prodid": $("#prodid").val(),
+            "prodname": $("#prodname").val()
+        };
+        sendPost(param);
+    });
+
+    // 新增商品事件
+    $("#addBtn").click(function () {
+        console.log("新增商品事件");
+        // 1. 准备客户端数据
+        var addProds = $("#addform").serialize();
+        console.log(addProds);
+        // 2. 准备请求地址
+        var addUrl = "/day15/asynProd/addProd";
+        // 3. 发送请求
+        sendRequest(addUrl, addProds);
+    });
+    // 修改商品事件
+    $("#upBtn").click(function () {
+        console.log("修改商品事件");
+        // 每次进来把内容先清空
+        $("#editform").html();
+        // 根据id查询待修改的商品信息
+        $.post("../asynProd/selectProdById", "prodId=" + prodid, function (data) {
+            console.log(data);
+            if (data.code == 2000) {
+                $("#editprodId").val(data.returnData.pid);
+                $("#editprodName").val(data.returnData.pname);
+                $("#editprodPrice").val(data.returnData.price);
+                $("#editprodImg").val(data.returnData.pimg);
+                $("#editprodDesc").val(data.returnData.pdesc);
+            }
+        }, "json");
+
+    });
+
+    // 提交修改
+    $("#editSubmitBtn").click(function () {
+        console.log("提交修改商品事件");
+        var param = $("#editform").serialize();
+        var editUrl = "../asynProd/updateProd";
+        sendRequest(editUrl, param);
+    });
+    // 删除商品事件
+    $("#delBtn").click(function () {
+        console.log("删除商品事件");
+        var param = "prodId=" + prodid;
+        var delUrl = "../asynProd/delProdById";
+        sendRequest(delUrl, param);
+    });
+
+
+    // 发送请求
+    function sendRequest(url, params) {
+        $.post(url, params, function (data) {
+            console.log("data: " + data);
+            var als = "";// 执行器
+            // 1. 根据返回结果提示信息
+            if (data.code == 2000) {
+                // success
+                als = "alert-success";
+            } else {
+                // error
+                als = "alert-danger";
+            }
+            // 2. 拼接提示信息
+            var alertContent = '<div class="alert ' + als + ' alert-dismissible fade in myalert" role="alert">' +
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>' +
+                '<h4>操作结果:</h4>' +
+                '<p>' + data.returnMsg + '</p>' +
+                '</div>';
+            // 2.1 输出到页面去
+            $("#showMsg").html(alertContent);
+            // 3 刷新页面
+            param = {
+                "page": page,
+                "pageSize": pageSize,
+                "prodid": $("#prodid").val(),
+                "prodname": $("#prodname").val()
+            };
+            sendPost(param);
+        }, "json");
+    }
+
+
+    // 检查状态：当前页数小于一页时，禁用向前查找；当前页数大于总页数时，禁用向后查找
+    function checkBtn() {
+        $("#prevBtn").prop("disabled", false);
+        $("#nextBtn").prop("disabled", false);
+        if (page <= 1) {
+            $("#prevBtn").prop("disabled", true);
+        }
+        if (page >= totalPage) {
+            $("#nextBtn").prop("disabled", true);
+        }
+    }
+
+    function sendPost(parm) {
+        // post 请求：异步请求
+        $.post("../asynProd/query", parm, function (data) {
+            // 清空当前列表数据
+            $("#dataMsg").html("");
+            // 根据响应码判断是否显示数据
+            if (data.code == 2000) {
+                $.each(data.returnData, function (i, d) {
+                    var content = '<tr><td>' + d.pid + '</td><td>' + d.pname + '</td><td>' + d.price + '</td><td>' + d.pimg + '</td><td>' + d.pdesc + '</td></tr>';
+                    // 将内容拼接到页面中
+                    $("#dataMsg").append(content);
+                });
+
+                $("#dataMsg>tr").click(function () {
+                    $("#dataMsg>tr").removeClass("info");
+                    $(this).addClass("info");
+                    prodid = $(this).find("td").eq(0).html();
+                    console.log(prodid);
+
+                    // 将页码信息输入到页面
+                    page = data.pageInfo.page;
+                    pageSize = data.pageInfo.pageSize;
+                    totalPage = data.pageInfo.totalPage;
+                    $("#pageSpan").html(page);
+                    $("#pageSizeSpan").html(pageSize);
+                    $("#totalPageSpan").html(totalPage);
+
+                    checkBtn();
+                });
+            } else {
+                $("#dataMsg").append(data.returnMsg);
+                // 将页码信息输入到页面
+                page = data.pageInfo.page;
+                pageSize = data.pageInfo.pageSize;
+                totalPage = data.pageInfo.totalPage;
+
+                $("#pageSpan").html(page);
+                $("#pageSizeSpan").html(pageSize);
+                $("#totalPageSpan").html(totalPage);
+                checkBtn();
+            }
+        }, "json");
+    }
+
+
+</script>
+</html>
